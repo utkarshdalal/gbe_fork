@@ -443,4 +443,9 @@ import base64
 with open('ticket.bin', 'rb') as f:
     print(base64.b64encode(f.read()).decode('utf-8'))
 ```
+
+## App Ownership Ticket (optional)
+* Create or edit `configs.user.ini` in your game's `steam_settings` folder
+* Add `app_ownership_ticket=` followed by your Base64-encoded ownership ticket
+* If omitted, the emulator keeps the existing (no-op) behavior
 ---

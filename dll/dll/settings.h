@@ -240,6 +240,8 @@ public:
     
     // Custom encrypted app ticket for Denuvo games.
     std::vector<uint8_t> customEncryptedAppTicket{};
+    // Custom app ownership ticket (opaque blob supplied by user).
+    std::vector<uint8_t> customAppOwnershipTicket{};
 
     //Depots
     std::vector<DepotId_t> depots{};

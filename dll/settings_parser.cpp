@@ -706,6 +706,17 @@ static void parse_encrypted_app_ticket(class Settings *settings_client, class Se
     }
 }
 
+// user::general::app_ownership_ticket
+static void parse_app_ownership_ticket(class Settings *settings_client, class Settings *settings_server)
+{
+    std::string ticketValue(common_helpers::string_strip(ini.GetValue("user::general", "app_ownership_ticket", "")));
+    if (!ticketValue.empty()) {
+        std::vector<uint8_t> ticket = base64_decode(ticketValue);
+        settings_client->customAppOwnershipTicket = ticket;
+        settings_server->customAppOwnershipTicket = ticket;
+    }
+}
+
 // user::general::language
 // valid list: https://partner.steamgames.com/doc/store/localization/languages
 static std::string parse_current_language(class Local_Storage *local_storage)
@@ -1911,6 +1922,7 @@ uint32 create_localstorage_settings(Settings **settings_client_out, Settings **s
     parse_ip_country(local_storage, settings_client, settings_server);
 
     parse_encrypted_app_ticket(settings_client, settings_server);
+    parse_app_ownership_ticket(settings_client, settings_server);
     
     // try local "steam_settings" then saves path, on second trial force load defaults
     if (!parse_branches_file(steam_settings_path, false, settings_client, settings_server, local_storage)) {

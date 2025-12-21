@@ -16,6 +16,7 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include "dll/appticket.h"
+#include "dll/settings.h"
 
 
 void AppTicketV1::Reset()
@@ -259,8 +260,36 @@ Steam_AppTicket::Steam_AppTicket(class Settings *settings) :
 
 uint32 Steam_AppTicket::GetAppOwnershipTicketData( uint32 nAppID, void *pvBuffer, uint32 cbBufferLength, uint32 *piAppId, uint32 *piSteamId, uint32 *piSignature, uint32 *pcbSignature )
 {
-    PRINT_DEBUG("TODO %u, %p, %u, %p, %p, %p, %p", nAppID, pvBuffer, cbBufferLength, piAppId, piSteamId, piSignature, pcbSignature);
+    PRINT_DEBUG("GetAppOwnershipTicketData appid=%u buf=%p len=%u", nAppID, pvBuffer, cbBufferLength);
     std::lock_guard<std::recursive_mutex> lock(global_mutex);
 
-    return 0;
+    if (!settings) {
+        return 0;
+    }
+
+    const auto &ticket = settings->customAppOwnershipTicket;
+    if (ticket.empty()) {
+        // Legacy behavior: nothing to return
+        return 0;
+    }
+
+    // We treat the ticket as opaque; offsets/signature lengths are not computed.
+    if (piAppId) *piAppId = 0;
+    if (piSteamId) *piSteamId = 0;
+    if (piSignature) *piSignature = 0;
+    if (pcbSignature) *pcbSignature = 0;
+
+    uint32 ticket_size = static_cast<uint32>(ticket.size());
+
+    // Allow size query without copying
+    if (!pvBuffer || cbBufferLength == 0) {
+        return ticket_size;
+    }
+
+    if (cbBufferLength < ticket_size) {
+        return 0;
+    }
+
+    memcpy(pvBuffer, ticket.data(), ticket_size);
+    return ticket_size;
 }
